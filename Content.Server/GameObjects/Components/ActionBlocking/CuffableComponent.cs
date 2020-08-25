@@ -224,7 +224,11 @@ namespace Content.Server.GameObjects.Components.ActionBlocking
 
             if (!isOwner && !ActionBlockerSystem.CanInteract(user))
             {
+<<<<<<< HEAD
                 user.PopupMessage(user, Loc.GetString("You can't do that!"));
+=======
+                user.PopupMessage(user, "You can't do that!");
+>>>>>>> a62935dab2e17b4a00d9b4b5ec63d694075eb794
                 return;
             }
 
@@ -235,7 +239,11 @@ namespace Content.Server.GameObjects.Components.ActionBlocking
                     _interactRange,
                     ignoredEnt: Owner))
             {
+<<<<<<< HEAD
                 user.PopupMessage(user, Loc.GetString("You are too far away to remove the cuffs."));
+=======
+                user.PopupMessage(user, "You are too far away to remove the cuffs.");
+>>>>>>> a62935dab2e17b4a00d9b4b5ec63d694075eb794
                 return;
             }
 
@@ -249,7 +257,11 @@ namespace Content.Server.GameObjects.Components.ActionBlocking
                 return;
             }
 
+<<<<<<< HEAD
             user.PopupMessage(user, Loc.GetString("You start removing the cuffs."));
+=======
+            user.PopupMessage(user, "You start removing the cuffs.");
+>>>>>>> a62935dab2e17b4a00d9b4b5ec63d694075eb794
 
             var audio = EntitySystem.Get<AudioSystem>();
             audio.PlayFromEntity(isOwner ? cuff.StartBreakoutSound : cuff.StartUncuffSound, Owner);
@@ -305,7 +317,11 @@ namespace Content.Server.GameObjects.Components.ActionBlocking
                 {
                     if (!isOwner)
                     {
+<<<<<<< HEAD
                         _notifyManager.PopupMessage(user, user, Loc.GetString("You successfully remove the cuffs. {0} of {1:theName}'s hands remain cuffed.", CuffedHandCount, user));
+=======
+                        _notifyManager.PopupMessage(user, user, Loc.GetString("You successfully remove the cuffs. {0} of {0:theName}'s hands remain cuffed.", CuffedHandCount, user));
+>>>>>>> a62935dab2e17b4a00d9b4b5ec63d694075eb794
                         _notifyManager.PopupMessage(user, Owner, Loc.GetString("{0:theName} removes your cuffs. {1} of your hands remain cuffed.", user, CuffedHandCount));
                     }
                     else
