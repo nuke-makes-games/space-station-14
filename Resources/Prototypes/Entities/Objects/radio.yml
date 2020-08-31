@@ -10,9 +10,10 @@
   parent: BaseRadio
   id: handrad
   components:
-  - type: Sprite
-    texture: Objects/Devices/radio.png
-  - type: Icon
-    texture: Objects/Devices/radio.png
-  - type: Listening
   - type: Radio
+  - type: Sprite
+    sprite: Objects/Devices/communication.rsi
+    state: walkietalkie
+  - type: Icon
+    sprite: Objects/Devices/communication.rsi
+    state: walkietalkie

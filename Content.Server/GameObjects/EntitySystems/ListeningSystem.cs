@@ -1,4 +1,4 @@
-﻿using Content.Server.GameObjects.Components;
+﻿using Content.Server.Interfaces;
 using Robust.Shared.GameObjects.Systems;
 using Robust.Shared.Interfaces.GameObjects;
 using Robust.Shared.Interfaces.Map;
@@ -7,17 +7,20 @@ using Robust.Shared.Map;
 
 namespace Content.Server.GameObjects.EntitySystems
 {
-    internal sealed class ListeningSystem : EntitySystem
+    class ListeningSystem : EntitySystem
     {
         [Dependency] private readonly IMapManager _mapManager = default!;
 
         public void PingListeners(IEntity source, GridCoordinates sourcePos, string message)
         {
-            foreach (var listener in ComponentManager.EntityQuery<ListeningComponent>())
+            foreach (var listener in ComponentManager.EntityQuery<IListen>())
             {
-                var dist = sourcePos.Distance(_mapManager, listener.Owner.Transform.GridPosition);
-
-                listener.PassSpeechData(message, source, dist);
+                var listenerPos = listener.Owner.Transform.GridPosition;
+                var dist = listenerPos.Distance(_mapManager, sourcePos);
+                if (dist <= listener.GetListenRange())
+                {
+                    listener.HeardSpeech(message, source);
+                }
             }
         }
     }

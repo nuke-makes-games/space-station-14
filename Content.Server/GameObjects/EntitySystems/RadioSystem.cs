@@ -1,31 +1,34 @@
-﻿using System.Collections.Generic;
-using Content.Server.GameObjects.Components;
+﻿using Content.Server.Interfaces;
+using System.Collections.Generic;
 using Robust.Shared.GameObjects.Systems;
 using Robust.Shared.Interfaces.GameObjects;
 
 namespace Content.Server.GameObjects.EntitySystems
 {
-    internal sealed class RadioSystem : EntitySystem
+    class RadioSystem : EntitySystem
     {
-        private readonly List<string> _messages = new List<string>();
+        private List<string> _messages;
 
-        public void SpreadMessage(IEntity source, string message)
+        public override void Initialize()
         {
-            if (_messages.Contains(message))
-            {
-                return;
-            }
+            base.Initialize();
+
+            _messages = new List<string>();
+        }
+
+        public void SpreadMessage(IRadio source, IEntity speaker, string message, int channel)
+        {
+            if (_messages.Contains(message)) { return; }
 
             _messages.Add(message);
 
-            foreach (var radio in ComponentManager.EntityQuery<RadioComponent>())
+            foreach (var radio in ComponentManager.EntityQuery<IRadio>())
             {
-                if (radio.Owner == source || !radio.RadioOn)
+                if (radio != source && radio.GetChannels().Contains(channel))
                 {
-                    continue;
+                    //TODO: once voice identity gets added, pass into receiver via source.GetSpeakerVoice()
+                    radio.Receiver(message, channel, speaker);
                 }
-
-                radio.Speaker(message);
             }
 
             _messages.Remove(message);

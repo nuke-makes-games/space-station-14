@@ -1,16 +1,20 @@
-﻿using Content.Server.GameObjects.EntitySystems;
+﻿using System.Collections.Generic;
+using Content.Server.GameObjects.EntitySystems;
 using Content.Server.Interfaces;
 using Content.Server.Interfaces.Chat;
 using Content.Shared.Interfaces.GameObjects.Components;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Interfaces.GameObjects;
 using Robust.Shared.IoC;
+using Robust.Shared.Map;
 using Robust.Shared.ViewVariables;
 
 namespace Content.Server.GameObjects.Components
 {
     [RegisterComponent]
-    class RadioComponent : Component, IUse, IListen
+    [ComponentReference(typeof(IRadio))]
+    [ComponentReference(typeof(IListen))]
+    class HandheldRadioComponent : Component, IUse, IListen, IRadio
     {
         [Dependency] private readonly IEntitySystemManager _entitySystemManager = default!;
         [Dependency] private readonly IServerNotifyManager _notifyManager = default!;
@@ -19,6 +23,8 @@ namespace Content.Server.GameObjects.Components
 
         private bool _radioOn;
         private int _listenRange = 7;
+        private List<int> _channels = new List<int>();
+        private int _broadcastChannel;
         private RadioSystem _radioSystem = default!;
 
         [ViewVariables]
@@ -37,16 +43,10 @@ namespace Content.Server.GameObjects.Components
             base.Initialize();
 
             _radioSystem = _entitySystemManager.GetEntitySystem<RadioSystem>();
+            _channels.Add(1459);
+            _broadcastChannel = 1459;
 
             RadioOn = false;
-        }
-
-        public void PassOnMessage(string message)
-        {
-            if(RadioOn)
-            {
-                _radioSystem.SpreadMessage(Owner, message);
-            }
         }
 
         public void Speaker(string message)
@@ -71,12 +71,33 @@ namespace Content.Server.GameObjects.Components
 
         public void HeardSpeech(string speech, IEntity source)
         {
-            PassOnMessage(speech);
+            if (RadioOn)
+            {
+                Broadcast(speech, source);
+            }
         }
 
         public int GetListenRange()
         {
             return _listenRange;
+        }
+
+        public void Receiver(string message, int channel, IEntity speaker)
+        {
+            if(RadioOn)
+            {
+                Speaker(message);
+            }
+        }
+
+        public void Broadcast(string message, IEntity speaker)
+        {
+            _radioSystem.SpreadMessage(this, speaker, message, _broadcastChannel);
+        }
+
+        public List<int> GetChannels()
+        {
+            return _channels;
         }
     }
 }

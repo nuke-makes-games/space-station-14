@@ -11,9 +11,13 @@ using Robust.Shared.Interfaces.GameObjects;
 using Robust.Shared.Interfaces.Network;
 using Robust.Shared.IoC;
 using Robust.Shared.Localization;
-using System;
 using System.Collections.Generic;
+using Content.Shared.GameObjects.Components.Inventory;
 using System.Linq;
+using Content.Server.GameObjects.Components;
+using Content.Server.GameObjects.Components.GUI;
+using Content.Server.GameObjects.Components.Items.Storage;
+using Robust.Shared.GameObjects.Systems;
 using static Content.Server.Interfaces.Chat.IChatManager;
 
 namespace Content.Server.Chat
@@ -37,7 +41,7 @@ namespace Content.Server.Chat
 
         //TODO: make prio based?
         private List<TransformChat> _chatTransformHandlers;
-        
+
         [Dependency] private readonly IEntitySystemManager _entitySystemManager = default!;
         [Dependency] private readonly IServerNetManager _netManager = default!;
         [Dependency] private readonly IPlayerManager _playerManager = default!;
@@ -115,15 +119,27 @@ namespace Content.Server.Chat
             var pos = source.Transform.GridPosition;
             var clients = _playerManager.GetPlayersInRange(pos, VoiceRange).Select(p => p.ConnectedClient);
 
+            if (message.StartsWith(';') && source.TryGetComponent(out InventoryComponent inventory))
+            {
+                message = message.Substring(1);
+                if (inventory.TryGetSlotItem(EquipmentSlotDefines.Slots.EARS, out ItemComponent item))
+                {
+                    if (item.Owner.TryGetComponent(out HeadsetComponent headset))
+                    {
+                        headset.RadioRequested = true;
+                    }
+                }
+            }
+
+            var listeners = EntitySystem.Get<ListeningSystem>();
+            listeners.PingListeners(source, pos, message);
+
             var msg = _netManager.CreateNetMessage<MsgChatMessage>();
             msg.Channel = ChatChannel.Local;
             msg.Message = message;
             msg.MessageWrap = $"{source.Name} says, \"{{0}}\"";
             msg.SenderEntity = source.Uid;
             _netManager.ServerSendToMany(msg, clients.ToList());
-
-            var listeners = _entitySystemManager.GetEntitySystem<ListeningSystem>();
-            listeners.PingListeners(source, pos, message);
         }
 
         public void EntityMe(IEntity source, string action)
