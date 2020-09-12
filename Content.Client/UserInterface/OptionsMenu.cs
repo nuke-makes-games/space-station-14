@@ -24,6 +24,7 @@ namespace Content.Client.UserInterface
             GraphicsControl graphicsControl;
             KeyRebindControl rebindControl;
             AudioControl audioControl;
+            InterfaceControl interfaceControl;
 
             var tabs = new TabContainer
             {
@@ -31,12 +32,14 @@ namespace Content.Client.UserInterface
                 {
                     (graphicsControl = new GraphicsControl(_configManager)),
                     (rebindControl = new KeyRebindControl()),
-                    (audioControl = new AudioControl(_configManager)),
+                    (interfaceControl = new InterfaceControl(_configManager)),
+                    (audioControl = new AudioControl(_configManager))
                 }
             };
 
             TabContainer.SetTabTitle(graphicsControl, Loc.GetString("Graphics"));
             TabContainer.SetTabTitle(rebindControl, Loc.GetString("Controls"));
+            TabContainer.SetTabTitle(interfaceControl, Loc.GetString("Interface"));
             TabContainer.SetTabTitle(audioControl, Loc.GetString("Audio"));
 
             Contents.AddChild(tabs);
